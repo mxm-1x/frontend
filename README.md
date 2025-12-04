@@ -113,3 +113,21 @@
 - **Vercel/Netlify** - Frontend hosting
 
 ## 🏗️ Architecture
+
+LaundryLink/
+├── backend/ # Express.js API server
+│ ├── src/
+│ │ ├── controllers/ # Request handlers
+│ │ ├── routes/ # API routes
+│ │ ├── middleware/ # Auth & validation
+│ │ ├── config/ # Database config
+│ │ └── utils/ # Helper functions
+│ └── prisma/ # Database schema & migrations
+│
+└── frontend/ # React SPA
+└── src/
+├── components/ # Reusable UI components
+├── pages/ # Page components
+├── services/ # API service layer
+├── context/ # React context (auth)
+└── assets/ # Static assets
