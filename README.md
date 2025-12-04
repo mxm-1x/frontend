@@ -1,73 +1,115 @@
-# React + TypeScript + Vite
+# 🧺 LaundryLink
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> A modern, full-stack laundry management system designed for university students and laundry staff to streamline the laundry service process.
 
-Currently, two official plugins are available:
+![LaundryLink Banner](https://img.shields.io/badge/Status-Production%20Ready-success)
+![Node](https://img.shields.io/badge/Node.js-20.x-green)
+![React](https://img.shields.io/badge/React-19.x-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-blue)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📋 Table of Contents
 
-## React Compiler
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+- [API Documentation](#api-documentation)
+- [Deployment](#deployment)
+- [Project Structure](#project-structure)
+- [Environment Variables](#environment-variables)
+- [Database Schema](#database-schema)
+- [Contributing](#contributing)
+- [License](#license)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🎯 Overview
 
-## Expanding the ESLint configuration
+**LaundryLink** is a comprehensive laundry management system that bridges the gap between university students and laundry staff. It provides a seamless digital platform for students to request laundry pickups, track their items, and communicate with staff about any issues. Staff members can efficiently manage all laundry operations, update statuses, and maintain service quality.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Key Highlights
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- 🔐 **Secure Authentication** - JWT-based authentication with role-based access control
+- 🎨 **Modern UI/UX** - Clean, responsive design with maroon and white theme
+- 📊 **Real-time Tracking** - Live status updates for laundry items
+- 🔍 **Advanced Filtering** - Search, filter, and sort laundry items
+- 📱 **Mobile Responsive** - Works seamlessly on all devices
+- ⚡ **Fast & Efficient** - Built with performance in mind
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## ✨ Features
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### For Students
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- ✅ **User Registration & Authentication**
+  - Register with university email (@rishihood.edu.in)
+  - Secure login with JWT tokens
+  - Persistent sessions across page refreshes
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- 🧺 **Laundry Management**
+  - Create detailed laundry tickets with item counts
+  - Track status: Pending → Washed → Picked Up
+  - View complete laundry history
+  - Mark items as picked up when ready
+  - Delete unwanted tickets
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- 🔍 **Smart Dashboard**
+  - Summary statistics (pending, picked up, washed items)
+  - Search by bag number or date
+  - Filter by status
+  - Sort by newest/oldest
+  - Tab-based navigation (All, Active, History)
+
+- 💬 **Issue Reporting**
+  - Report issues with laundry items
+  - View staff responses
+  - Edit existing issues
+
+### For Staff
+
+- 🔐 **Staff Portal**
+  - Secure staff login
+  - Dedicated staff dashboard
+
+- 📊 **Comprehensive Management**
+  - View all student laundry items
+  - Update laundry status (Pending/Washed)
+  - Filter by status
+  - View detailed student information
+  - Item breakdown for each ticket
+
+- 🛠️ **Issue Management**
+  - Add/edit issues for laundry items
+  - Inline editing interface
+  - Communicate problems to students
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **React 19** - Modern UI library
+- **TypeScript** - Type-safe development
+- **React Router** - Client-side routing
+- **Axios** - HTTP client with interceptors
+- **Vite** - Fast build tool
+- **CSS3** - Custom styling with animations
+- **React Icons** - Icon library
+
+### Backend
+- **Node.js 20.x** - JavaScript runtime
+- **Express 5** - Web framework
+- **TypeScript** - Type-safe backend
+- **Prisma** - Modern ORM
+- **PostgreSQL** - Relational database
+- **JWT** - Authentication
+- **bcrypt** - Password hashing
+- **CORS** - Cross-origin resource sharing
+
+### Database
+- **PostgreSQL** (Neon) - Cloud-hosted database
+- **Prisma ORM** - Type-safe database queries
+
+### DevOps
+- **Git** - Version control
+- **Render** - Backend hosting
+- **Vercel/Netlify** - Frontend hosting
+
+## 🏗️ Architecture
