@@ -91,23 +91,23 @@ const StaffDashboard: React.FC = () => {
                     <h2>LaundryLink</h2>
                     <p className="sidebar-subtitle">Staff Portal</p>
                 </div>
-                
+
                 <nav className="sidebar-nav">
-                    <button 
+                    <button
                         className={`sidebar-item ${activeTab === 'dashboard' ? 'active' : ''}`}
                         onClick={() => setActiveTab('dashboard')}
                     >
                         <MdDashboard className="sidebar-icon" />
                         <span>Dashboard</span>
                     </button>
-                    <button 
+                    <button
                         className={`sidebar-item ${activeTab === 'laundry' ? 'active' : ''}`}
                         onClick={() => setActiveTab('laundry')}
                     >
                         <MdLocalLaundryService className="sidebar-icon" />
                         <span>All Laundry</span>
                     </button>
-                    <button 
+                    <button
                         className={`sidebar-item ${activeTab === 'students' ? 'active' : ''}`}
                         onClick={() => setActiveTab('students')}
                     >
@@ -139,168 +139,204 @@ const StaffDashboard: React.FC = () => {
 
                 {/* Dashboard Content */}
                 <div className="dashboard-container">
-            <div className="dashboard-content">
-                <section className="stats-section">
-                    <div className="stat-card">
-                        <h3>Total Items</h3>
-                        <p className="stat-number">{laundryItems.length}</p>
-                    </div>
-                    <div className="stat-card">
-                        <h3>Pending</h3>
-                        <p className="stat-number">{laundryItems.filter(i => i.status === 'PENDING').length}</p>
-                    </div>
-                    <div className="stat-card">
-                        <h3>Picked Up</h3>
-                        <p className="stat-number">{laundryItems.filter(i => i.status === 'PICKED_UP').length}</p>
-                    </div>
-                    <div className="stat-card">
-                        <h3>Washed</h3>
-                        <p className="stat-number">{laundryItems.filter(i => i.status === 'WASHED').length}</p>
-                    </div>
-                </section>
-
-                <section className="filter-section">
-                    <h2>All Laundry Items</h2>
-                    <div className="filter-buttons">
-                        <button
-                            className={filter === 'ALL' ? 'filter-btn active' : 'filter-btn'}
-                            onClick={() => setFilter('ALL')}
-                        >
-                            All
-                        </button>
-                        {allStatusOptions.map(status => (
-                            <button
-                                key={status}
-                                className={filter === status ? 'filter-btn active' : 'filter-btn'}
-                                onClick={() => setFilter(status)}
-                            >
-                                {status.replace('_', ' ')}
-                            </button>
-                        ))}
-                    </div>
-                </section>
-
-                {error && <div className="error-message">{error}</div>}
-
-                <section className="laundry-section">
-                    {loading ? (
-                        <p>Loading...</p>
-                    ) : filteredItems.length === 0 ? (
-                        <p className="empty-state">No laundry items found.</p>
-                    ) : (
-                        <div className="laundry-table">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Student</th>
-                                        <th>Bag #</th>
-                                        <th>Items</th>
-                                        <th>Total</th>
-                                        <th>Pickup Date</th>
-                                        <th>Delivery Date</th>
-                                        <th>Status</th>
-                                        <th>Issue</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredItems.map((item) => (
-                                        <tr key={item.id}>
-                                            <td>{item.id}</td>
-                                            <td>
-                                                <div>{item.student?.name || item.Student?.name || 'N/A'}</div>
-                                                <div style={{ fontSize: '12px', color: 'var(--text-light)' }}>
-                                                    {item.student?.gender || item.Student?.gender || 'N/A'}
-                                                </div>
-                                            </td>
-                                            <td>{item.bagNumber}</td>
-                                            <td>
-                                                <div className="items-breakdown">
-                                                    {item.shirts > 0 && <span className="item-badge">Shirts: {item.shirts}</span>}
-                                                    {item.bottoms > 0 && <span className="item-badge">Bottoms: {item.bottoms}</span>}
-                                                    {item.towels > 0 && <span className="item-badge">Towels: {item.towels}</span>}
-                                                    {item.bedsheets > 0 && <span className="item-badge">Bedsheets: {item.bedsheets}</span>}
-                                                    {item.others > 0 && <span className="item-badge">Others: {item.others}</span>}
-                                                </div>
-                                            </td>
-                                            <td><strong>{item.totalItems}</strong></td>
-                                            <td>{new Date(item.pickupDate).toLocaleDateString()}</td>
-                                            <td>{item.deliveryDate ? new Date(item.deliveryDate).toLocaleDateString() : '-'}</td>
-                                            <td>{getStatusBadge(item.status)}</td>
-                                            <td>
-                                                {editingIssue === item.id ? (
-                                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                        <input
-                                                            type="text"
-                                                            value={issueText}
-                                                            onChange={(e) => setIssueText(e.target.value)}
-                                                            placeholder="Enter issue..."
-                                                            style={{
-                                                                padding: '6px',
-                                                                borderRadius: '4px',
-                                                                border: '1px solid var(--border-color)',
-                                                                background: 'var(--background-light)',
-                                                                color: 'var(--text-dark)',
-                                                                fontSize: '13px',
-                                                                flex: 1
-                                                            }}
-                                                        />
-                                                        <button
-                                                            onClick={() => handleIssueUpdate(item.id)}
-                                                            className="btn-secondary"
-                                                            style={{ padding: '6px 12px', fontSize: '12px' }}
-                                                        >
-                                                            Save
-                                                        </button>
-                                                        <button
-                                                            onClick={handleCancelEdit}
-                                                            className="btn-secondary"
-                                                            style={{ padding: '6px 12px', fontSize: '12px' }}
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                        <span style={{
-                                                            color: item.issue ? 'var(--error-color)' : 'var(--text-light)',
-                                                            fontSize: '13px',
-                                                            flex: 1
-                                                        }}>
-                                                            {item.issue || 'No issues'}
-                                                        </span>
-                                                        <button
-                                                            onClick={() => handleEditIssue(item.id, item.issue)}
-                                                            className="btn-secondary"
-                                                            style={{ padding: '6px 12px', fontSize: '12px' }}
-                                                        >
-                                                            {item.issue ? 'Edit' : 'Add'}
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <select
-                                                    value={item.status}
-                                                    onChange={(e) => handleStatusUpdate(item.id, e.target.value)}
-                                                    className="status-select"
-                                                >
-                                                    {staffStatusOptions.map(status => (
-                                                        <option key={status} value={status}>
-                                                            {status.replace('_', ' ')}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                    {/* Stats Section */}
+                    <div className="student-summary">
+                        <div className="summary-header">
+                            <div>
+                                <h2>Overview</h2>
+                                <p className="summary-subtitle">Laundry management statistics</p>
+                            </div>
                         </div>
-                    )}
-                </section>
-            </div>
+
+                        <div className="summary-stats">
+                            <div className="summary-stat-card">
+                                <div className="stat-icon total">
+                                    <MdLocalLaundryService />
+                                </div>
+                                <div className="stat-info">
+                                    <p className="stat-label">Total Items</p>
+                                    <p className="stat-value">{laundryItems.length}</p>
+                                </div>
+                            </div>
+                            <div className="summary-stat-card">
+                                <div className="stat-icon pending">
+                                    <MdLocalLaundryService />
+                                </div>
+                                <div className="stat-info">
+                                    <p className="stat-label">Pending</p>
+                                    <p className="stat-value">{laundryItems.filter(i => i.status === 'PENDING').length}</p>
+                                </div>
+                            </div>
+                            <div className="summary-stat-card">
+                                <div className="stat-icon picked-up">
+                                    <MdLocalLaundryService />
+                                </div>
+                                <div className="stat-info">
+                                    <p className="stat-label">Picked Up</p>
+                                    <p className="stat-value">{laundryItems.filter(i => i.status === 'PICKED_UP').length}</p>
+                                </div>
+                            </div>
+                            <div className="summary-stat-card">
+                                <div className="stat-icon washed">
+                                    <MdLocalLaundryService />
+                                </div>
+                                <div className="stat-info">
+                                    <p className="stat-label">Washed</p>
+                                    <p className="stat-value">{laundryItems.filter(i => i.status === 'WASHED').length}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="dashboard-content">
+                        <section className="laundry-section">
+                            <h2>Laundry Management</h2>
+
+                            {/* Filter Section */}
+                            <div className="filter-search-container">
+                                <div className="filter-section">
+                                    <button
+                                        className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
+                                        onClick={() => setFilter('ALL')}
+                                    >
+                                        All
+                                    </button>
+                                    {allStatusOptions.map(status => (
+                                        <button
+                                            key={status}
+                                            className={`filter-btn ${filter === status ? 'active' : ''}`}
+                                            onClick={() => setFilter(status)}
+                                        >
+                                            {status.replace('_', ' ')}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {error && <div className="error-message">{error}</div>}
+
+                            {loading ? (
+                                <p>Loading...</p>
+                            ) : filteredItems.length === 0 ? (
+                                <div className="empty-state">
+                                    <p>No laundry items found.</p>
+                                </div>
+                            ) : (
+                                <div className="laundry-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Student</th>
+                                                <th>Bag #</th>
+                                                <th>Items</th>
+                                                <th>Total</th>
+                                                <th>Pickup Date</th>
+                                                <th>Status</th>
+                                                <th>Issue</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredItems.map((item) => (
+                                                <tr key={item.id}>
+                                                    <td>#{item.id}</td>
+                                                    <td>
+                                                        <div style={{ fontWeight: 600 }}>{item.student?.name || item.Student?.name || 'N/A'}</div>
+                                                        <div style={{ fontSize: '12px', color: '#666' }}>
+                                                            {item.student?.gender || item.Student?.gender || 'N/A'}
+                                                        </div>
+                                                    </td>
+                                                    <td>{item.bagNumber}</td>
+                                                    <td>
+                                                        <div className="items-breakdown">
+                                                            {item.shirts > 0 && <span className="item-badge">Shirts: {item.shirts}</span>}
+                                                            {item.bottoms > 0 && <span className="item-badge">Bottoms: {item.bottoms}</span>}
+                                                            {item.towels > 0 && <span className="item-badge">Towels: {item.towels}</span>}
+                                                            {item.bedsheets > 0 && <span className="item-badge">Sheets: {item.bedsheets}</span>}
+                                                            {item.others > 0 && <span className="item-badge">Others: {item.others}</span>}
+                                                        </div>
+                                                    </td>
+                                                    <td><strong>{item.totalItems}</strong></td>
+                                                    <td>{new Date(item.pickupDate).toLocaleDateString()}</td>
+                                                    <td>{getStatusBadge(item.status)}</td>
+                                                    <td>
+                                                        {editingIssue === item.id ? (
+                                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                                <input
+                                                                    type="text"
+                                                                    value={issueText}
+                                                                    onChange={(e) => setIssueText(e.target.value)}
+                                                                    placeholder="Enter issue..."
+                                                                    style={{
+                                                                        padding: '6px',
+                                                                        borderRadius: '4px',
+                                                                        border: '1px solid #e5e5e5',
+                                                                        fontSize: '13px',
+                                                                        width: '120px'
+                                                                    }}
+                                                                />
+                                                                <button
+                                                                    onClick={() => handleIssueUpdate(item.id)}
+                                                                    className="btn-create-ticket"
+                                                                    style={{ padding: '6px 12px', fontSize: '12px' }}
+                                                                >
+                                                                    Save
+                                                                </button>
+                                                                <button
+                                                                    onClick={handleCancelEdit}
+                                                                    className="filter-btn"
+                                                                    style={{ padding: '6px 12px', fontSize: '12px' }}
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                                <span style={{
+                                                                    color: item.issue ? '#ef4444' : '#666',
+                                                                    fontSize: '13px',
+                                                                    fontWeight: item.issue ? 600 : 400
+                                                                }}>
+                                                                    {item.issue || 'No issues'}
+                                                                </span>
+                                                                <button
+                                                                    onClick={() => handleEditIssue(item.id, item.issue)}
+                                                                    style={{
+                                                                        background: 'none',
+                                                                        border: 'none',
+                                                                        color: '#999',
+                                                                        fontSize: '12px',
+                                                                        cursor: 'pointer',
+                                                                        textDecoration: 'underline'
+                                                                    }}
+                                                                >
+                                                                    {item.issue ? 'Edit' : 'Add'}
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td>
+                                                        <select
+                                                            value={item.status}
+                                                            onChange={(e) => handleStatusUpdate(item.id, e.target.value)}
+                                                            className="status-select"
+                                                        >
+                                                            {staffStatusOptions.map(status => (
+                                                                <option key={status} value={status}>
+                                                                    {status.replace('_', ' ')}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </section>
+                    </div>
                 </div>
             </div>
         </div>

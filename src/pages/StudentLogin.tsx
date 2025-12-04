@@ -31,6 +31,9 @@ const StudentLogin: React.FC = () => {
     return (
         <div className="auth-container">
             <div className="auth-card">
+                <div className="auth-logo">
+                    LaundryLink <span>.</span>
+                </div>
                 <h2>Student Login</h2>
                 <p className="auth-subtitle">Welcome back to LaundryLink</p>
 
@@ -61,8 +64,8 @@ const StudentLogin: React.FC = () => {
                         />
                     </div>
 
-                    <button type="submit" className="btn-primary" disabled={loading}>
-                        {loading ? 'Logging in...' : 'Login'}
+                    <button type="submit" className="btn-auth" disabled={loading}>
+                        {loading ? 'Logging in...' : 'Log In'}
                     </button>
                 </form>
 

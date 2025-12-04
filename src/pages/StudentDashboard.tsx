@@ -33,7 +33,6 @@ const StudentDashboard: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        // Auto-dismiss success and error messages after 5 seconds
         if (successMessage || error) {
             const timer = setTimeout(() => {
                 setSuccessMessage('');
@@ -121,6 +120,18 @@ const StudentDashboard: React.FC = () => {
         }
     };
 
+    const handleDeleteTicket = async (id: number, bagNumber: string) => {
+        if (window.confirm(`Are you sure you want to delete laundry ticket for Bag #${bagNumber}? This action cannot be undone.`)) {
+            try {
+                await laundryService.deleteLaundryTicket(id);
+                setSuccessMessage('Laundry ticket deleted successfully!');
+                fetchLaundry();
+            } catch (err: any) {
+                setError('Failed to delete laundry ticket');
+            }
+        }
+    };
+
     const handleEditIssue = (id: number, currentIssue: string | null) => {
         setEditingIssue(id);
         setIssueText(currentIssue || '');
@@ -131,30 +142,24 @@ const StudentDashboard: React.FC = () => {
         setIssueText('');
     };
 
-    // Filter and search logic with sorting
     const filteredLaundryItems = laundryItems
         .filter(item => {
-            // Handle history tab - show only PICKED_UP items
             if (activeTab === 'history') {
                 if (item.status !== 'PICKED_UP') return false;
             }
-            // Handle laundry tab - show PENDING and WASHED items
             else if (activeTab === 'laundry') {
                 if (item.status === 'PICKED_UP') return false;
             }
-            
-            // Filter by status
+
             const matchesStatus = filterStatus === 'ALL' || item.status === filterStatus;
-            
-            // Search by bag number or date
-            const matchesSearch = searchQuery === '' || 
+
+            const matchesSearch = searchQuery === '' ||
                 item.bagNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 new Date(item.pickupDate).toLocaleDateString().includes(searchQuery);
-            
+
             return matchesStatus && matchesSearch;
         })
         .sort((a, b) => {
-            // Sort by creation date
             const dateA = new Date(a.pickupDate).getTime();
             const dateB = new Date(b.pickupDate).getTime();
             return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
@@ -168,23 +173,23 @@ const StudentDashboard: React.FC = () => {
                     <h2>LaundryLink</h2>
                     <p className="sidebar-subtitle">Student Portal</p>
                 </div>
-                
+
                 <nav className="sidebar-nav">
-                    <button 
+                    <button
                         className={`sidebar-item ${activeTab === 'dashboard' ? 'active' : ''}`}
                         onClick={() => setActiveTab('dashboard')}
                     >
                         <MdDashboard className="sidebar-icon" />
                         <span>Dashboard</span>
                     </button>
-                    <button 
+                    <button
                         className={`sidebar-item ${activeTab === 'laundry' ? 'active' : ''}`}
                         onClick={() => setActiveTab('laundry')}
                     >
                         <MdLocalLaundryService className="sidebar-icon" />
                         <span>My Laundry</span>
                     </button>
-                    <button 
+                    <button
                         className={`sidebar-item ${activeTab === 'history' ? 'active' : ''}`}
                         onClick={() => setActiveTab('history')}
                     >
@@ -220,17 +225,17 @@ const StudentDashboard: React.FC = () => {
                     <div className="student-summary">
                         <div className="summary-header">
                             <div>
-                                <h2>Welcome Back, Student!</h2>
-                                <p className="summary-subtitle">Manage your laundry requests and track their status</p>
+                                <h2>Welcome Back</h2>
+                                <p className="summary-subtitle">Manage your laundry requests</p>
                             </div>
-                            <button 
+                            <button
                                 className="btn-create-ticket"
                                 onClick={() => setShowCreateModal(true)}
                             >
-                                + Create New Ticket
+                                + Create Ticket
                             </button>
                         </div>
-                        
+
                         <div className="summary-stats">
                             <div className="summary-stat-card">
                                 <div className="stat-icon pending">
@@ -271,321 +276,203 @@ const StudentDashboard: React.FC = () => {
                         </div>
                     </div>
 
-            <div className="dashboard-content">
-                <section className="laundry-section">
-                    <h2>
-                        {activeTab === 'dashboard' && 'My Laundry Status'}
-                        {activeTab === 'laundry' && 'Active Laundry'}
-                        {activeTab === 'history' && 'Laundry History'}
-                    </h2>
-                    {error && <div className="error-message">{error}</div>}
-                    {successMessage && <div className="success-message">{successMessage}</div>}
-                    
-                    {laundryItems.length === 0 ? (
-                        <div className="empty-state">
-                            <MdLocalLaundryService style={{ fontSize: '64px', color: '#ccc', marginBottom: '16px' }} />
-                            <p>No laundry items yet.</p>
-                            <p style={{ fontSize: '14px', color: '#666' }}>Click "Create New Ticket" to get started!</p>
-                        </div>
-                    ) : (
-                        <>
-                            {/* Filter and Search Bar */}
-                            <div className="filter-search-container">
-                                <div className="search-bar">
-                                    <input
-                                        type="text"
-                                        placeholder="Search by bag number or date..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="search-input"
-                                    />
-                                </div>
-                                <div className="filter-section">
-                                    <select
-                                        value={sortOrder}
-                                        onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
-                                        className="filter-btn"
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        <option value="newest">Newest First</option>
-                                        <option value="oldest">Oldest First</option>
-                                    </select>
-                                    <button
-                                        className={`filter-btn ${filterStatus === 'ALL' ? 'active' : ''}`}
-                                        onClick={() => setFilterStatus('ALL')}
-                                    >
-                                        All
-                                    </button>
-                                    <button
-                                        className={`filter-btn ${filterStatus === 'PENDING' ? 'active' : ''}`}
-                                        onClick={() => setFilterStatus('PENDING')}
-                                    >
-                                        Pending
-                                    </button>
-                                    <button
-                                        className={`filter-btn ${filterStatus === 'PICKED_UP' ? 'active' : ''}`}
-                                        onClick={() => setFilterStatus('PICKED_UP')}
-                                    >
-                                        Picked Up
-                                    </button>
-                                    <button
-                                        className={`filter-btn ${filterStatus === 'WASHED' ? 'active' : ''}`}
-                                        onClick={() => setFilterStatus('WASHED')}
-                                    >
-                                        Washed
-                                    </button>
-                                </div>
-                            </div>
+                    <div className="dashboard-content">
+                        <section className="laundry-section">
+                            <h2>
+                                {activeTab === 'dashboard' && 'My Laundry Status'}
+                                {activeTab === 'laundry' && 'Active Laundry'}
+                                {activeTab === 'history' && 'Laundry History'}
+                            </h2>
+                            {error && <div className="error-message">{error}</div>}
+                            {successMessage && <div className="success-message">{successMessage}</div>}
 
-                            {filteredLaundryItems.length === 0 ? (
+                            {laundryItems.length === 0 ? (
                                 <div className="empty-state">
-                                    <MdLocalLaundryService style={{ fontSize: '48px', color: '#ccc', marginBottom: '12px' }} />
-                                    <p>
-                                        {activeTab === 'history' 
-                                            ? 'No picked up items in your history yet.' 
-                                            : 'No laundry items match your search.'}
-                                    </p>
+                                    <MdLocalLaundryService style={{ fontSize: '48px', color: '#ccc', marginBottom: '16px' }} />
+                                    <p>No laundry items yet.</p>
+                                    <p style={{ fontSize: '14px', color: '#666' }}>Click "Create Ticket" to get started!</p>
                                 </div>
                             ) : (
-                                <div className="laundry-grid">
-                            {filteredLaundryItems.map((item) => (
-                                <div key={item.id} className="laundry-card">
-                                    <div className="laundry-header">
-                                        <h3>{new Date(item.pickupDate).toLocaleDateString('en-US', { 
-                                            weekday: 'short', 
-                                            year: 'numeric', 
-                                            month: 'short', 
-                                            day: 'numeric' 
-                                        })}</h3>
-                                        {getStatusBadge(item.status)}
-                                    </div>
-                                    <div className="laundry-details">
-                                        <p><strong>Bag Number:</strong> #{item.bagNumber}</p>
-                                        <p><strong>Total Items:</strong> {item.totalItems}</p>
-                                        <div className="items-breakdown">
-                                            {item.shirts > 0 && <span className="item-badge">Shirts: {item.shirts}</span>}
-                                            {item.bottoms > 0 && <span className="item-badge">Bottoms: {item.bottoms}</span>}
-                                            {item.towels > 0 && <span className="item-badge">Towels: {item.towels}</span>}
-                                            {item.bedsheets > 0 && <span className="item-badge">Bedsheets: {item.bedsheets}</span>}
-                                            {item.others > 0 && <span className="item-badge">Others: {item.others}</span>}
+                                <>
+                                    {/* Filter and Search Bar */}
+                                    <div className="filter-search-container">
+                                        <div className="search-bar">
+                                            <input
+                                                type="text"
+                                                placeholder="Search by bag number or date..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className="search-input"
+                                            />
                                         </div>
-                                        <p><strong>Pickup Date:</strong> {new Date(item.pickupDate).toLocaleDateString()}</p>
-                                        {item.deliveryDate && (
-                                            <p><strong>Delivery Date:</strong> {new Date(item.deliveryDate).toLocaleDateString()}</p>
-                                        )}
+                                        <div className="filter-section">
+                                            <select
+                                                value={sortOrder}
+                                                onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
+                                                className="filter-btn"
+                                            >
+                                                <option value="newest">Newest First</option>
+                                                <option value="oldest">Oldest First</option>
+                                            </select>
+                                            <button
+                                                className={`filter-btn ${filterStatus === 'ALL' ? 'active' : ''}`}
+                                                onClick={() => setFilterStatus('ALL')}
+                                            >
+                                                All
+                                            </button>
+                                            <button
+                                                className={`filter-btn ${filterStatus === 'PENDING' ? 'active' : ''}`}
+                                                onClick={() => setFilterStatus('PENDING')}
+                                            >
+                                                Pending
+                                            </button>
+                                            <button
+                                                className={`filter-btn ${filterStatus === 'PICKED_UP' ? 'active' : ''}`}
+                                                onClick={() => setFilterStatus('PICKED_UP')}
+                                            >
+                                                Picked Up
+                                            </button>
+                                            <button
+                                                className={`filter-btn ${filterStatus === 'WASHED' ? 'active' : ''}`}
+                                                onClick={() => setFilterStatus('WASHED')}
+                                            >
+                                                Washed
+                                            </button>
+                                        </div>
+                                    </div>
 
-                                        {/* Issue Section */}
-                                        <div style={{ marginTop: '12px' }}>
-                                            {editingIssue === item.id ? (
-                                                <div style={{
-                                                    padding: '12px',
-                                                    background: 'rgba(14, 165, 233, 0.1)',
-                                                    border: '1px solid var(--sky-blue)',
-                                                    borderRadius: '8px'
-                                                }}>
-                                                    <label style={{
-                                                        display: 'block',
-                                                        color: 'var(--text-dark)',
-                                                        fontWeight: 600,
-                                                        marginBottom: '8px',
-                                                        fontSize: '13px'
-                                                    }}>
-                                                        Report an Issue:
-                                                    </label>
-                                                    <textarea
-                                                        value={issueText}
-                                                        onChange={(e) => setIssueText(e.target.value)}
-                                                        placeholder="Describe any issues with your laundry..."
-                                                        style={{
-                                                            width: '100%',
-                                                            padding: '8px',
-                                                            borderRadius: '6px',
-                                                            border: '1px solid var(--border-color)',
-                                                            background: 'var(--background-light)',
-                                                            color: 'var(--text-dark)',
-                                                            fontSize: '13px',
-                                                            minHeight: '60px',
-                                                            resize: 'vertical',
-                                                            marginBottom: '8px'
-                                                        }}
-                                                    />
-                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                    {filteredLaundryItems.length === 0 ? (
+                                        <div className="empty-state">
+                                            <p>No items match your search.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="laundry-grid">
+                                            {filteredLaundryItems.map((item) => (
+                                                <div key={item.id} className="laundry-card">
+                                                    <div className="laundry-header">
+                                                        <h3>{new Date(item.pickupDate).toLocaleDateString('en-US', {
+                                                            weekday: 'short',
+                                                            month: 'short',
+                                                            day: 'numeric'
+                                                        })}</h3>
+                                                        {getStatusBadge(item.status)}
+                                                    </div>
+                                                    <div className="laundry-details">
+                                                        <p><strong>Bag:</strong> #{item.bagNumber}</p>
+                                                        <div className="items-breakdown">
+                                                            {item.shirts > 0 && <span className="item-badge">Shirts: {item.shirts}</span>}
+                                                            {item.bottoms > 0 && <span className="item-badge">Bottoms: {item.bottoms}</span>}
+                                                            {item.towels > 0 && <span className="item-badge">Towels: {item.towels}</span>}
+                                                            {item.bedsheets > 0 && <span className="item-badge">Sheets: {item.bedsheets}</span>}
+                                                            {item.others > 0 && <span className="item-badge">Others: {item.others}</span>}
+                                                        </div>
+
+                                                        {/* Issue Section */}
+                                                        <div style={{ marginTop: '12px' }}>
+                                                            {editingIssue === item.id ? (
+                                                                <div style={{ padding: '12px', background: '#f9f9f9', borderRadius: '8px' }}>
+                                                                    <textarea
+                                                                        value={issueText}
+                                                                        onChange={(e) => setIssueText(e.target.value)}
+                                                                        placeholder="Describe issue..."
+                                                                        style={{
+                                                                            width: '100%',
+                                                                            padding: '8px',
+                                                                            borderRadius: '6px',
+                                                                            border: '1px solid #e5e5e5',
+                                                                            marginBottom: '8px'
+                                                                        }}
+                                                                    />
+                                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                                        <button onClick={() => handleIssueUpdate(item.id)} className="btn-create-ticket" style={{ padding: '6px 12px', fontSize: '12px' }}>Save</button>
+                                                                        <button onClick={handleCancelEdit} className="filter-btn" style={{ padding: '6px 12px', fontSize: '12px' }}>Cancel</button>
+                                                                    </div>
+                                                                </div>
+                                                            ) : item.issue ? (
+                                                                <div style={{ padding: '10px', background: '#fef2f2', borderRadius: '8px', border: '1px solid #fee2e2' }}>
+                                                                    <p style={{ color: '#ef4444', fontSize: '12px', fontWeight: 600, margin: '0 0 4px 0' }}>Issue Reported:</p>
+                                                                    <p style={{ fontSize: '13px', margin: 0 }}>{item.issue}</p>
+                                                                    <button onClick={() => handleEditIssue(item.id, item.issue)} style={{ background: 'none', border: 'none', color: '#666', fontSize: '11px', marginTop: '4px', cursor: 'pointer', textDecoration: 'underline' }}>Edit</button>
+                                                                </div>
+                                                            ) : (
+                                                                <button onClick={() => handleEditIssue(item.id, null)} style={{ background: 'none', border: 'none', color: '#999', fontSize: '12px', cursor: 'pointer' }}>Report Issue</button>
+                                                            )}
+                                                        </div>
+
+                                                        {item.status === 'WASHED' && (
+                                                            <button
+                                                                className="btn-mark-picked"
+                                                                onClick={() => handleMarkAsPickedUp(item.id, item.bagNumber)}
+                                                            >
+                                                                Mark as Picked Up
+                                                            </button>
+                                                        )}
+
+                                                        {/* Delete Button */}
                                                         <button
-                                                            onClick={() => handleIssueUpdate(item.id)}
-                                                            className="btn-primary"
-                                                            style={{ padding: '8px 16px', fontSize: '13px', flex: 1 }}
+                                                            className="btn-delete"
+                                                            onClick={() => handleDeleteTicket(item.id, item.bagNumber)}
+                                                            title="Delete this laundry ticket"
                                                         >
-                                                            Save Issue
-                                                        </button>
-                                                        <button
-                                                            onClick={handleCancelEdit}
-                                                            className="btn-secondary"
-                                                            style={{ padding: '8px 16px', fontSize: '13px', flex: 1 }}
-                                                        >
-                                                            Cancel
+                                                            🗑️ Delete
                                                         </button>
                                                     </div>
                                                 </div>
-                                            ) : item.issue ? (
-                                                <div style={{
-                                                    padding: '12px',
-                                                    background: 'rgba(239, 68, 68, 0.1)',
-                                                    border: '1px solid var(--error-color)',
-                                                    borderRadius: '8px'
-                                                }}>
-                                                    <p style={{
-                                                        color: 'var(--error-color)',
-                                                        fontWeight: 600,
-                                                        marginBottom: '6px',
-                                                        fontSize: '13px'
-                                                    }}>
-                                                        Issue Reported:
-                                                    </p>
-                                                    <p style={{
-                                                        color: 'var(--text-dark)',
-                                                        fontSize: '13px',
-                                                        marginBottom: '8px'
-                                                    }}>
-                                                        {item.issue}
-                                                    </p>
-                                                    <button
-                                                        onClick={() => handleEditIssue(item.id, item.issue)}
-                                                        className="btn-secondary"
-                                                        style={{ padding: '6px 12px', fontSize: '12px' }}
-                                                    >
-                                                        Edit Issue
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handleEditIssue(item.id, null)}
-                                                    className="btn-secondary"
-                                                    style={{ padding: '8px 16px', fontSize: '13px', width: '100%' }}
-                                                >
-                                                    Report an Issue
-                                                </button>
-                                            )}
+                                            ))}
                                         </div>
-
-                                        {item.status === 'WASHED' && (
-                                            <button
-                                                className="btn-mark-picked"
-                                                onClick={() => handleMarkAsPickedUp(item.id, item.bagNumber)}
-                                            >
-                                                ✓ Mark as Picked Up
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                    )}
+                                </>
                             )}
-                        </>
-                    )}
-                </section>
-            </div>
-
-                {/* Create Ticket Modal */}
-                {showCreateModal && (
-                    <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                            <div className="modal-header">
-                                <h2>Create New Laundry Ticket</h2>
-                                <button 
-                                    className="modal-close"
-                                    onClick={() => setShowCreateModal(false)}
-                                >
-                                    ×
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleRequestPickup} className="laundry-ticket-form">
-                                <div className="items-grid">
-                                    <div className="form-group">
-                                        <label htmlFor="shirts">Shirts</label>
-                                        <input
-                                            type="number"
-                                            id="shirts"
-                                            min="0"
-                                            value={formData.shirts}
-                                            onChange={(e) => handleInputChange('shirts', parseInt(e.target.value) || 0)}
-                                            placeholder="0"
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="bottoms">Bottoms</label>
-                                        <input
-                                            type="number"
-                                            id="bottoms"
-                                            min="0"
-                                            value={formData.bottoms}
-                                            onChange={(e) => handleInputChange('bottoms', parseInt(e.target.value) || 0)}
-                                            placeholder="0"
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="towels">Towels</label>
-                                        <input
-                                            type="number"
-                                            id="towels"
-                                            min="0"
-                                            value={formData.towels}
-                                            onChange={(e) => handleInputChange('towels', parseInt(e.target.value) || 0)}
-                                            placeholder="0"
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="bedsheets">Bedsheets</label>
-                                        <input
-                                            type="number"
-                                            id="bedsheets"
-                                            min="0"
-                                            value={formData.bedsheets}
-                                            onChange={(e) => handleInputChange('bedsheets', parseInt(e.target.value) || 0)}
-                                            placeholder="0"
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="others">Others</label>
-                                        <input
-                                            type="number"
-                                            id="others"
-                                            min="0"
-                                            value={formData.others}
-                                            onChange={(e) => handleInputChange('others', parseInt(e.target.value) || 0)}
-                                            placeholder="0"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="total-items">
-                                    <strong>Total Items:</strong> {getTotalItems()}
-                                </div>
-
-                                <div className="modal-actions">
-                                    <button
-                                        type="button"
-                                        className="btn-secondary"
-                                        onClick={() => setShowCreateModal(false)}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="btn-primary"
-                                        disabled={loading || getTotalItems() === 0}
-                                    >
-                                        {loading ? 'Creating Ticket...' : 'Create Laundry Ticket'}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                        </section>
                     </div>
-                )}
+
+                    {/* Create Ticket Modal */}
+                    {showCreateModal && (
+                        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">
+                                    <h2>New Laundry Ticket</h2>
+                                    <button className="modal-close" onClick={() => setShowCreateModal(false)}>×</button>
+                                </div>
+
+                                <form onSubmit={handleRequestPickup} className="laundry-ticket-form">
+                                    <div className="items-grid">
+                                        <div className="form-group">
+                                            <label htmlFor="shirts">Shirts</label>
+                                            <input type="number" id="shirts" min="0" value={formData.shirts} onChange={(e) => handleInputChange('shirts', parseInt(e.target.value) || 0)} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="bottoms">Bottoms</label>
+                                            <input type="number" id="bottoms" min="0" value={formData.bottoms} onChange={(e) => handleInputChange('bottoms', parseInt(e.target.value) || 0)} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="towels">Towels</label>
+                                            <input type="number" id="towels" min="0" value={formData.towels} onChange={(e) => handleInputChange('towels', parseInt(e.target.value) || 0)} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="bedsheets">Bedsheets</label>
+                                            <input type="number" id="bedsheets" min="0" value={formData.bedsheets} onChange={(e) => handleInputChange('bedsheets', parseInt(e.target.value) || 0)} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="others">Others</label>
+                                            <input type="number" id="others" min="0" value={formData.others} onChange={(e) => handleInputChange('others', parseInt(e.target.value) || 0)} />
+                                        </div>
+                                    </div>
+
+                                    <div className="total-items">
+                                        Total Items: {getTotalItems()}
+                                    </div>
+
+                                    <div className="modal-actions">
+                                        <button type="button" className="btn-secondary" onClick={() => setShowCreateModal(false)}>Cancel</button>
+                                        <button type="submit" className="btn-primary" disabled={loading || getTotalItems() === 0}>
+                                            {loading ? 'Creating...' : 'Create Ticket'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
 
                 </div>
             </div>

@@ -58,6 +58,11 @@ export const laundryService = {
         return response.data;
     },
 
+    deleteLaundryTicket: async (id: number) => {
+        const response = await api.delete(`/students/laundry/${id}`);
+        return response.data;
+    },
+
     // Staff endpoints
     getAllLaundry: async (): Promise<LaundryItem[]> => {
         const response = await api.get('/laundry');

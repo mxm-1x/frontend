@@ -58,7 +58,10 @@ const StudentRegister: React.FC = () => {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <h2>Student Registration</h2>
+                <div className="auth-logo">
+                    LaundryLink <span>.</span>
+                </div>
+                <h2>Create Account</h2>
                 <p className="auth-subtitle">Join LaundryLink today</p>
 
                 {error && <div className="error-message">{error}</div>}
@@ -144,13 +147,13 @@ const StudentRegister: React.FC = () => {
                         />
                     </div>
 
-                    <button type="submit" className="btn-primary" disabled={loading}>
-                        {loading ? 'Registering...' : 'Register'}
+                    <button type="submit" className="btn-auth" disabled={loading}>
+                        {loading ? 'Creating Account...' : 'Register'}
                     </button>
                 </form>
 
                 <p className="auth-footer">
-                    Already have an account? <Link to="/student/login">Login here</Link>
+                    Already have an account? <Link to="/student/login">Log In</Link>
                 </p>
                 <p className="auth-footer">
                     <Link to="/">Back to Home</Link>
